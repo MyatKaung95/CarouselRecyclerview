@@ -123,18 +123,10 @@ class CarouselLayoutManager constructor(
         /**Item moves to bottom */
         private const val SCROLL_TO_BOTTOM = 4
 
-        /**
-         * Maximum information that can store at a time so if there are suppose more than 10000
-         * it is not good idea to cache those views so initially we keep 100 items in cache memory
-         */
         private const val MAX_RECT_COUNT = 100
 
     }
 
-    /**
-     * Initial method for the layout manager at first you just have override in
-     * order to compile your layout manager generate layout params for your items.
-     */
     override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
         return RecyclerView.LayoutParams(
             RecyclerView.LayoutParams.WRAP_CONTENT,
@@ -142,12 +134,6 @@ class CarouselLayoutManager constructor(
         )
     }
 
-    /**
-     * It will call initially two times first when adapter data and second when dispatch layout is called
-     * layout the data initially
-     * @param recycler recyclerview recycler which will provides view for the position
-     * @param state recyclerview state which has information about state of the recyclerview
-     */
     override fun onLayoutChildren(recycler: RecyclerView.Recycler?, state: RecyclerView.State?) {
         if (state == null || recycler == null)
             return
@@ -207,40 +193,21 @@ class CarouselLayoutManager constructor(
         this.state = state
     }
 
-    /** Method tell recyclerview that layout manager will act on horizontally scroll
-     * @return return boolean value to tell recyclerview for scroll handling with horizontal direction
-     * */
     override fun canScrollHorizontally(): Boolean {
 
         return isScrollingEnabled && (orientation == RecyclerView.HORIZONTAL)
     }
 
-    /** Method tell recyclerview that layout manager will act on vertically scroll
-     * @return return boolean value to tell recyclerview for scroll handling with vertical direction
-     * */
     override fun canScrollVertically(): Boolean {
 
         return isScrollingEnabled && (orientation == RecyclerView.VERTICAL)
     }
-
-    /**
-     * Callback method, whenever horizontal scroll happens recyclerview calls this method with the offset
-     * @param dx how much does it scroll including the direction (-ve left) (+ve right)
-     * @param recycler provides the view from recyclerview
-     * @param state provides information about state of the layout manager
-     */
     override fun scrollHorizontallyBy(
         dx: Int,
         recycler: RecyclerView.Recycler?,
         state: RecyclerView.State?
     ): Int = handleScrollBy(dx, recycler, state)
 
-    /**
-     * Callback method, whenever vertical scroll happens recyclerview calls this method with the offset
-     * @param dy how much does it scroll including the direction (-ve top) (+ve bottom)
-     * @param recycler provides the view from recyclerview
-     * @param state provides information about state of the layout manager
-     */
     override fun scrollVerticallyBy(
         dy: Int,
         recycler: RecyclerView.Recycler?,
@@ -276,11 +243,6 @@ class CarouselLayoutManager constructor(
         return travel
     }
 
-    /**
-     * Layout out items
-     * First recycle those items views which are no longer visible to the screens
-     * Layout new items on the screens which are currently visible
-     */
     private fun layoutItems(
         recycler: RecyclerView.Recycler,
         state: RecyclerView.State,
@@ -352,11 +314,7 @@ class CarouselLayoutManager constructor(
 
     }
 
-    /**
-     * Layout item and apply different attribute on the view
-     * @param child view to be layout
-     * @param rect area of the view (left, top. right, bottom)
-     */
+
     private fun layoutItem(child: View, rect: Rect) {
         when (orientation) {
             RecyclerView.HORIZONTAL -> {
@@ -394,7 +352,7 @@ class CarouselLayoutManager constructor(
      * Tilt the child view, center view rotation will be 0
      * tilt others views based on the drawing order
      */
-    private fun itemRotate(child: View, frame: Rect) {
+   /* private fun itemRotate(child: View, frame: Rect) {
         val itemCenter =
             (getRectLeftOrTop(frame) + getRectRightOrBottom(frame) - 2 * mOffsetAll) / 2f
         var value =
@@ -411,6 +369,43 @@ class CarouselLayoutManager constructor(
                 child.rotationX = symbol * 50 * abs(value)
             }
         }
+    }*/
+   /* private fun itemRotate(child: View, frame: Rect) {
+        val itemCenter = (getRectLeftOrTop(frame) + getRectRightOrBottom(frame) - 2 * mOffsetAll) / 2f
+        var value = (itemCenter - (getStartXOrY() + getItemDecoratedWidthOrHeight() / 2f)) * 1f / (itemCount * getIntervalDistance())
+        value = sqrt(abs(value).toDouble()).toFloat()
+        val symbol = if (itemCenter > getStartXOrY() + getItemDecoratedWidthOrHeight() / 2f) (-1).toFloat() else 1.toFloat()
+
+        when (orientation) {
+            RecyclerView.HORIZONTAL -> {
+                child.rotation = symbol * 50 * abs(value)
+            }
+            RecyclerView.VERTICAL -> {
+                child.rotation = symbol * 50 * abs(value)
+            }
+        }
+    }*/
+    private fun itemRotate(child: View, frame: Rect) {
+        val itemCenter = (getRectLeftOrTop(frame) + getRectRightOrBottom(frame) - 2 * mOffsetAll) / 2f
+        var value = (itemCenter - (getStartXOrY() + getItemDecoratedWidthOrHeight() / 2f)) * 1f / (itemCount * getIntervalDistance())
+        value = sqrt(abs(value).toDouble()).toFloat()
+        val symbol = if (itemCenter > getStartXOrY() + getItemDecoratedWidthOrHeight() / 2f) (-1).toFloat() else 1.toFloat()
+
+        when (orientation) {
+            RecyclerView.HORIZONTAL -> {
+                child.rotation = symbol * -50 * abs(value)
+                child.translationX = symbol * 400 * abs(value)
+            }
+            RecyclerView.VERTICAL -> {
+                child.rotation = symbol * -50 * abs(value)
+                child.translationY = symbol * 400 * abs(value)
+            }
+        }
+
+        // Adjust item spacing for more pronounced fan effect
+        val scaleFactor = 1.2f
+        child.scaleX = scaleFactor - abs(value)
+        child.scaleY = scaleFactor - abs(value)
     }
 
     /**
@@ -508,12 +503,6 @@ class CarouselLayoutManager constructor(
 
     }
 
-    /**
-     * Scroll to specified position with the animation
-     * @param recyclerView Recyclerview instance
-     * @param state provides information about the state of the layout manager
-     * @param position where we need to scrolls
-     */
     override fun smoothScrollToPosition(
         recyclerView: RecyclerView?,
         state: RecyclerView.State?,
@@ -525,11 +514,6 @@ class CarouselLayoutManager constructor(
         startScroll(mOffsetAll, finalOffset)
     }
 
-    /**
-     * Provides the center position of current display area, this method used in the [CarouselRecyclerview.getChildDrawingOrder]
-     * where we make child order
-     * @return Int center position
-     */
     fun centerPosition(): Int {
         val intervalPosition = getIntervalDistance()
         if (intervalPosition == 0) return intervalPosition
@@ -543,10 +527,6 @@ class CarouselLayoutManager constructor(
         return pos
     }
 
-    /**
-     * Provides the child actual position from layout manager by using child tag [TAG] and recyclerview position
-     * It's also used in the [CarouselRecyclerview.getChildDrawingOrder] for measure the order of the child
-     */
     fun getChildActualPos(index: Int): Int {
         val child = getChildAt(index) ?: return Int.MIN_VALUE
 
@@ -558,9 +538,6 @@ class CarouselLayoutManager constructor(
         return getPosition(child)
     }
 
-    /**
-     * Check the child tag if it's not the [TAG] throw an error
-     */
     private fun checkTAG(tag: Any?): TAG? {
         return if (tag != null) {
             if (tag is TAG) {
@@ -574,10 +551,6 @@ class CarouselLayoutManager constructor(
 
     }
 
-    /**
-     * Callback method, call when the data of the adapter is changes,
-     * we resetting all the data and attributes
-     */
     override fun onAdapterChanged(
         oldAdapter: RecyclerView.Adapter<*>?,
         newAdapter: RecyclerView.Adapter<*>?
@@ -593,10 +566,6 @@ class CarouselLayoutManager constructor(
         intervalRatio = 0.5f
     }
 
-    /**
-     * Get the first visible position from the layout manager
-     * @return get view which is at the start of the screen
-     */
     fun getFirstVisiblePosition(): Int {
         val displayFrame = createRect()
         val cur: Int = centerPosition()
@@ -610,10 +579,6 @@ class CarouselLayoutManager constructor(
         }
     }
 
-    /**
-     * Get the last visible position from the layout manager
-     * @return get view which is at the end of the screen
-     */
     fun getLastVisiblePosition(): Int {
         val displayFrame = createRect()
         val cur: Int = centerPosition()
@@ -627,10 +592,6 @@ class CarouselLayoutManager constructor(
         }
     }
 
-    /**
-     * It will calculate the selected position which the center view of the layout manager,
-     * calls the interface callback
-     */
     private fun onSelectedCallback() {
         //Some time interval distance is returns 0 that makes [ArithmeticException]
         val intervalDistance = getIntervalDistance()
@@ -647,11 +608,6 @@ class CarouselLayoutManager constructor(
         mLastSelectedPosition = selectedPosition
     }
 
-    /**
-     * Get the frame of specified view
-     * @param position view position
-     * @return Rect
-     */
     private fun getFrame(position: Int): Rect {
         var frame = mAllItemsFrames[position]
         if (frame == null) {
@@ -663,11 +619,6 @@ class CarouselLayoutManager constructor(
         return frame
     }
 
-    /**
-     * Calculate the scale of the view
-     * @param x left coordinate of the view
-     * @return Float
-     */
     private fun computeScale(x: Int): Float {
         val startXOrY = getStartXOrY()
         var scale: Float =
@@ -678,11 +629,6 @@ class CarouselLayoutManager constructor(
         return scale
     }
 
-    /**
-     * Calculate the transulate of the view
-     * @param x left coordinate of the view
-     * @return Float
-     */
     private fun computeAlpha(x: Int): Float {
         val startXOrY = getStartXOrY()
         var alpha: Float =
@@ -693,11 +639,6 @@ class CarouselLayoutManager constructor(
         return alpha
     }
 
-    /**
-     * Calculate position offset from the positon of the view
-     * @param position view's position
-     * @return Int offset of the view
-     */
     private fun calculatePositionOffset(position: Int): Int {
         return ((getIntervalDistance() * position).toFloat()).roundToInt()
     }
@@ -743,51 +684,30 @@ class CarouselLayoutManager constructor(
      */
     internal fun getSelectedPosition() = selectedPosition
 
-    /**
-     * Returns the right direction according to [orientation].
-     * @return one of [SCROLL_TO_LEFT], [SCROLL_TO_TOP].
-     */
     private fun getScrollToLeftOrTopDirection(): Int = when (orientation) {
         RecyclerView.HORIZONTAL -> SCROLL_TO_LEFT
         RecyclerView.VERTICAL -> SCROLL_TO_TOP
         else -> SCROLL_TO_LEFT
     }
 
-    /**
-     * Returns the right direction according to [orientation].
-     * @return one of [SCROLL_TO_RIGHT], [SCROLL_TO_BOTTOM].
-     */
     private fun getScrollToRightOrBottomDirection(): Int = when (orientation) {
         RecyclerView.HORIZONTAL -> SCROLL_TO_RIGHT
         RecyclerView.VERTICAL -> SCROLL_TO_BOTTOM
         else -> SCROLL_TO_RIGHT
     }
 
-    /**
-     * Returns the starting position according to [orientation].
-     * @return one of [mStartX], [mStartY].
-     */
     private fun getStartXOrY(): Int = when (orientation) {
         RecyclerView.HORIZONTAL -> mStartX
         RecyclerView.VERTICAL -> mStartY
         else -> mStartX
     }
 
-    /**
-     * Returns the width or height of the item according to [orientation].
-     * @return one of [mItemDecoratedWidth], [mItemDecoratedHeight].
-     */
     private fun getItemDecoratedWidthOrHeight(): Int = when (orientation) {
         RecyclerView.HORIZONTAL -> mItemDecoratedWidth
         RecyclerView.VERTICAL -> mItemDecoratedHeight
         else -> mItemDecoratedWidth
     }
 
-    /**
-     * Creates a [Rect] according to [orientation]. Calculates necessary offsets and spaces with the
-     * help of [mOffsetAll], [getHorizontalSpace], and [getVerticalSpace].
-     * @return an instance of [Rect].
-     */
     private fun createRect(): Rect = when (orientation) {
         RecyclerView.HORIZONTAL -> {
             Rect(mOffsetAll, 0, mOffsetAll + getHorizontalSpace(), getVerticalSpace())
@@ -800,12 +720,6 @@ class CarouselLayoutManager constructor(
         }
     }
 
-    /**
-     * Sets [frame]'s coordinates according to [orientation]. Calculates necessary offsets, width,
-     * and height with the help of [offset], [mItemDecoratedWidth], and [mItemDecoratedWidth]
-     * @param frame any instance of [Rect]
-     * @param offset must be either [mStartX] or [mStartY]
-     */
     private fun setFrameCoordinates(frame: Rect, offset: Int) {
         when (orientation) {
             RecyclerView.HORIZONTAL -> {
@@ -816,28 +730,18 @@ class CarouselLayoutManager constructor(
             }
         }
     }
-
-    /**
-     * @return left or top coordinates of given [rect] according to [orientation]
-     */
     private fun getRectLeftOrTop(rect: Rect): Int = when (orientation) {
         RecyclerView.HORIZONTAL -> rect.left
         RecyclerView.VERTICAL -> rect.top
         else -> rect.left
     }
 
-    /**
-     * @return right or bottom coordinates of given [rect] according to [orientation]
-     */
     private fun getRectRightOrBottom(rect: Rect): Int = when (orientation) {
         RecyclerView.HORIZONTAL -> rect.right
         RecyclerView.VERTICAL -> rect.bottom
         else -> rect.right
     }
 
-    /**
-     * Use the builder pattern to get all the required attribute for the layout manager
-     */
     class Builder {
         private var isInfinite = false
         private var is3DItem = false
@@ -896,9 +800,6 @@ class CarouselLayoutManager constructor(
         }
     }
 
-    /**
-     * Store the child position for laying out the view
-     */
     internal data class TAG(var pos: Int = 0)
 
     override fun isAutoMeasureEnabled() = true

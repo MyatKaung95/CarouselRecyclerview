@@ -1,6 +1,7 @@
 package com.jackandphantom.carousellayout
 
 import android.os.Bundle
+import android.view.View.OnClickListener
 import androidx.appcompat.app.AppCompatActivity
 import com.example.customviewimple.model.DataModel
 import com.jackandphantom.carousellayout.adapter.DataAdapter
@@ -18,11 +19,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val list = ArrayList<DataModel>()
-        list.add(DataModel(R.drawable.hacker, "Thi is cool"))
-        list.add(DataModel(R.drawable.hobes, "Thi is cool"))
-        list.add(DataModel(R.drawable.guypro, "Thi is cool"))
-        list.add(DataModel(R.drawable.joker, "Thi is cool"))
-       // list.add(DataModel(R.drawable.londonlove, "Thi is cool"))
+
+        for(i in 1..78) {
+            list.add(DataModel(R.drawable.tarot,"This is Tarot Card"))
+        }
 
         val adapter = DataAdapter(list)
 
